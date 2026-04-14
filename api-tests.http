@@ -203,3 +203,59 @@ Content-Type: application/json
     "country": "Test"
   }
 }
+
+###########################################################################
+## 5. 购物车接口
+###########################################################################
+
+### 添加商品到购物车
+POST {{baseUrl}}/cart/items
+Authorization: {{userToken}}
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 2
+}
+
+### 添加另一个商品到购物车
+POST {{baseUrl}}/cart/items
+Authorization: {{userToken}}
+Content-Type: application/json
+
+{
+  "productId": 3,
+  "quantity": 1
+}
+
+### 查询我的购物车
+GET {{baseUrl}}/cart
+Authorization: {{userToken}}
+
+### 更新购物车商品数量
+PUT {{baseUrl}}/cart/items/1/quantity
+Authorization: {{userToken}}
+Content-Type: application/json
+
+{
+  "quantity": 5
+}
+
+### 切换商品选中状态
+PATCH {{baseUrl}}/cart/items/1/toggle-selection
+Authorization: {{userToken}}
+
+### 删除单个购物车商品
+DELETE {{baseUrl}}/cart/items/1
+Authorization: {{userToken}}
+
+### 批量删除购物车商品
+DELETE {{baseUrl}}/cart/items/batch
+Authorization: {{userToken}}
+Content-Type: application/json
+
+[2, 3, 4]
+
+### 清空购物车
+DELETE {{baseUrl}}/cart/clear
+Authorization: {{userToken}}
