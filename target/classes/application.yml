@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: ecommerce-backend
+  
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: mySecretKeyForJWTGenerationWhichShouldBeLongEnoughForSecurity
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+logging:
+  level:
+    com.example.ecommerce: DEBUG
+    org.springframework.security: DEBUG
+
+app:
+  jwt:
+    secret: mySecretKeyForJWTGenerationWhichShouldBeLongEnoughForSecurity
+    expiration: 86400000

@@ -1,0 +1,205 @@
+### E-commerce API 测试文件
+### 在IDEA或VS Code(安装REST Client插件)中直接点击▶️运行
+
+@baseUrl = http://localhost:8080/api
+@adminToken = Bearer YOUR_ADMIN_TOKEN
+@userToken = Bearer YOUR_USER_TOKEN
+
+###########################################################################
+## 1. 用户认证接口
+###########################################################################
+
+### 用户注册
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "demo_user",
+  "email": "demo@example.com",
+  "password": "demo123456",
+  "firstName": "Demo",
+  "lastName": "User"
+}
+
+### 管理员登录 - 请复制返回的token到上面的adminToken
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "admin",
+  "password": "admin123"
+}
+
+### 普通用户登录 - 请复制返回的token到上面的userToken
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "testuser",
+  "password": "user123"
+}
+
+### 获取当前用户信息
+GET {{baseUrl}}/auth/me
+Authorization: {{adminToken}}
+
+### 用户登出
+POST {{baseUrl}}/auth/logout
+Authorization: {{userToken}}
+
+###########################################################################
+## 2. 商品管理接口
+###########################################################################
+
+### 获取商品列表（公开）
+GET {{baseUrl}}/products?page=0&size=10&sortBy=price&direction=asc
+
+### 搜索商品 - 按名称
+GET {{baseUrl}}/products/search?name=iPhone
+
+### 搜索商品 - 按分类和价格
+GET {{baseUrl}}/products/search?category=ELECTRONICS&minPrice=1000&maxPrice=20000
+
+### 获取单个商品详情
+GET {{baseUrl}}/products/1
+
+### 创建商品（需要管理员权限）
+POST {{baseUrl}}/products
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "iPad Pro 12.9",
+  "description": "M2芯片，Liquid Retina XDR显示屏",
+  "price": 8999.00,
+  "stockQuantity": 50,
+  "category": "ELECTRONICS",
+  "imageUrl": "https://example.com/ipad.jpg"
+}
+
+### 更新商品信息（需要管理员权限）
+PUT {{baseUrl}}/products/1
+Authorization: {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "iPhone 15 Pro Max",
+  "description": "256GB 深空黑色",
+  "price": 8999.00,
+  "stockQuantity": 45,
+  "category": "ELECTRONICS"
+}
+
+### 更新商品库存（需要管理员权限）
+PATCH {{baseUrl}}/products/1/stock?quantity=100
+Authorization: {{adminToken}}
+
+### 删除商品（软删除，标记为INACTIVE）
+DELETE {{baseUrl}}/products/2
+Authorization: {{adminToken}}
+
+###########################################################################
+## 3. 订单管理接口
+###########################################################################
+
+### 创建订单
+POST {{baseUrl}}/orders
+Authorization: {{userToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {"productId": 1, "quantity": 1},
+    {"productId": 3, "quantity": 2}
+  ],
+  "shippingAddress": {
+    "recipientName": "张三",
+    "addressLine1": "上海市浦东新区张江高科技园区",
+    "addressLine2": "科苑路88号",
+    "city": "上海",
+    "state": "上海市",
+    "postalCode": "201203",
+    "country": "中国",
+    "phoneNumber": "13900139000"
+  }
+}
+
+### 获取我的订单列表
+GET {{baseUrl}}/orders/my-orders?page=0&size=10
+Authorization: {{userToken}}
+
+### 获取订单详情
+GET {{baseUrl}}/orders/1
+Authorization: {{userToken}}
+
+### 取消订单
+PATCH {{baseUrl}}/orders/1/status?status=CANCELLED
+Authorization: {{userToken}}
+
+### 获取所有订单（管理员权限）
+GET {{baseUrl}}/orders?page=0&size=20
+Authorization: {{adminToken}}
+
+### 按状态筛选订单（管理员权限）
+GET {{baseUrl}}/orders/status/PENDING?page=0&size=10
+Authorization: {{adminToken}}
+
+###########################################################################
+## 4. 错误测试用例
+###########################################################################
+
+### 测试：用户名已存在
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "email": "admin2@example.com",
+  "password": "123456",
+  "firstName": "Admin",
+  "lastName": "Test"
+}
+
+### 测试：登录密码错误
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "admin",
+  "password": "wrongpassword"
+}
+
+### 测试：未授权访问订单接口
+GET {{baseUrl}}/orders/my-orders
+
+### 测试：普通用户创建商品（权限不足）
+POST {{baseUrl}}/products
+Authorization: {{userToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Product",
+  "description": "Test",
+  "price": 100.00,
+  "stockQuantity": 10,
+  "category": "BOOKS"
+}
+
+### 测试：库存不足的订单
+POST {{baseUrl}}/orders
+Authorization: {{userToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {"productId": 1, "quantity": 9999}
+  ],
+  "shippingAddress": {
+    "recipientName": "Test",
+    "addressLine1": "Test",
+    "city": "Test",
+    "state": "Test",
+    "postalCode": "123456",
+    "country": "Test"
+  }
+}
