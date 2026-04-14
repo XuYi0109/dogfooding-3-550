@@ -2,6 +2,7 @@ package com.example.ecommerce.user.service;
 
 import com.example.ecommerce.common.exception.BusinessException;
 import com.example.ecommerce.security.JwtUtil;
+import com.example.ecommerce.security.UserPrincipal;
 import com.example.ecommerce.user.dto.LoginRequest;
 import com.example.ecommerce.user.dto.LoginResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -31,16 +31,17 @@ public class AuthService {
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
             
-            String jwt = jwtUtil.generateToken(userDetails);
+            String jwt = jwtUtil.generateToken(userPrincipal, userPrincipal.getId());
             
-            log.info("User logged in successfully: {}", userDetails.getUsername());
+            log.info("User logged in successfully: {}", userPrincipal.getUsername());
             
             return LoginResponse.builder()
                     .token(jwt)
                     .type("Bearer")
-                    .username(userDetails.getUsername())
+                    .username(userPrincipal.getUsername())
+                    .userId(userPrincipal.getId())
                     .build();
                     
         } catch (Exception e) {
